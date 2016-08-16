@@ -1,5 +1,9 @@
 package com.example.android.booklisting;
 
+import android.content.Context;
+import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,11 +48,14 @@ public class MainActivity extends AppCompatActivity {
         View.OnClickListener searchListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                EditText bookToSearch = (EditText) findViewById(R.id.bootToSearch);
-                bookSearch = bookToSearch.getText().toString();
-                BookAsyncTask task = new BookAsyncTask();
-                task.execute();
-
+                if (isNetworkAvailable() == false) {
+                    Toast.makeText(getApplicationContext(),"network not available",Toast.LENGTH_LONG).show();
+                } else {
+                    EditText bookToSearch = (EditText) findViewById(R.id.bootToSearch);
+                    bookSearch = bookToSearch.getText().toString();
+                    BookAsyncTask task = new BookAsyncTask();
+                    task.execute();
+                }
             }
         };
 
@@ -190,9 +198,17 @@ public class MainActivity extends AppCompatActivity {
 
                         // Extract out the title, time, and tsunami values
                         String title = properties.getString("title");
-                 //       String author = properties.getString("authors");
-                        JSONArray authorsArray = properties.getJSONArray("authors");
-                        String author = "@string/no_author";
+
+                        JSONArray authorsArray = new JSONArray();
+                        String author = "";
+                        try {
+                            authorsArray = properties.getJSONArray("authors");
+                        } catch (JSONException e) {
+                            Log.e(LOG_TAG, "no authors available", e);
+                            author = "no author";
+                        }
+
+
                         if (authorsArray.length() > 0) {
                             StringBuilder outputAuthor = new StringBuilder();
                             for (int j = 0; j < authorsArray.length(); j++) {
@@ -213,6 +229,19 @@ public class MainActivity extends AppCompatActivity {
             }
             return null;
         }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
     }
 
 }
