@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">BookListing</string>
+    <string name="search_button">search</string>
+    <string name="edit_text_hint">enter book name</string>
+    <string name="no_author">no author</string>
+    <string name="help">enter book name that you are looking for in edittext fiel above</string>
+</resources>
